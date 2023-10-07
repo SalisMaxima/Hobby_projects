@@ -1,0 +1,72 @@
+#import libraries
+import math as m
+import numpy as np
+
+#magic square generation
+def genRandSquare(n):
+        M = np.random.permutation(range(1,n**2+1)).reshape(n,n)
+        return(M)
+
+def getNumOfViolated(M,n):
+        target_sum = n*(n**2 + 1)/2 #sum that should be satisfied
+        num_of_violated = 0
+        #check rows
+        rows_sum = np.sum(M, axis=1) # get sum for each row
+        num_of_violated += np.sum(rows_sum != target_sum)
+        #check columns 
+        columns_sum = np.sum(M, axis=0) # get sum for each column 
+        num_of_violated += np.sum(columns_sum != target_sum)
+        #check main diagonal
+        num_of_violated += (np.trace(M) != target_sum)
+        #check non-main diagonal
+        num_of_violated += (np.trace(np.flip(M,axis=0)) != target_sum)
+        return num_of_violated
+    
+def getSuccessor(n,M,x1,y1,x2,y2):
+    successor = genRandSquare(n)
+    successor = M.copy()
+    # swap values
+    successor[x1,y1],successor[x2,y2] = successor[x2,y2],successor[x1,y1]
+    return successor
+
+#simulated annealing 
+T=100
+i = 0
+lst_states=[]
+lst_violations=[]
+
+for i in range(0,50):
+    state=genRandSquare(3)
+    lst_states.append(state)
+    violation=getNumOfViolated(state,3)
+    lst_violations.append(violation)
+violation_and_states=list(zip(lst_violations,lst_states))
+violation_and_states_sorted = sorted(violation_and_states, key = lambda x: x[0])
+least_violation=violation_and_states_sorted[0][0]
+least_violation_state=violation_and_states_sorted[0][1]
+res=least_violation
+res_state=least_violation_state
+print(least_violation)
+print(least_violation_state)
+
+j=0
+y=[]
+x=[]
+x.append(j+1)
+y.append(res)
+while  j < 1000:
+    T = 0.995*T
+    if(least_violation == 0) or (T == 0): 
+        break
+    lst_states=[]
+    lst_violations=[]
+    # generate a random batch of 50 models and select the best one
+    for i in range(0,50):
+        state=genRandSquare(3)
+        lst_states.append(state)
+        violation_=getNumOfViolated(state,3)
+        lst_violations.append(violation_)    
+        if j % 100 == 0:
+            print(f"Iteration {j}: Least violation = {least_violation}")
+    j += 1
+    

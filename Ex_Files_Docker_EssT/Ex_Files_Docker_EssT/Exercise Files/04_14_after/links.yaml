@@ -1,0 +1,9 @@
+- name: Choosing an init process for multi-process containers by Ahmet Alp Balkan.
+  original_link: https://ahmet.im/blog/minimal-init-process-for-containers/
+  archived_link: https://archive.ph/RO33G
+- name: Run Multiple Processes in a Container by Runnable.
+  original_link: https://runnable.com/docker/rails/run-multiple-processes-in-a-container
+  archived_link: https://archive.ph/Ssaln
+- name: Running systemd inside a Docker container by Christoph Zauner.
+  original_link: https://zauner.nllk.net/post/0038-running-systemd-inside-a-docker-container/
+  archived_link: https://archive.ph/i79Lq
