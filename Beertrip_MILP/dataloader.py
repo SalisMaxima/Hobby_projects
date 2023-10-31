@@ -1,6 +1,6 @@
 """
 This is a script that loads in data from either CSV, JSON, XML or TXT files
-and then saves it to a database.
+and then saves it to a variable. If the parameter pandas is True then the data is saved as a pandas dataframe.
 
 Created by: Mathias Herl'v Lund
 Date: 31/10/2023
@@ -8,88 +8,70 @@ Version: 1.0
 
 """
 
-import csv,pandas as pd, json, xml.etree.ElementTree as ET, sqlite3, os, sys, time
+import csv
+import json
+import sqlite3
+import sys
+import pandas as pd
 
-def load_data(file_name, file_type, db_name, table_name):
+def load_data(file_name, file_type, dataname,pandas=False):
     case = file_type.lower()
+    if pandas == True:
+        #Load in the data as a pandas dataframe
+        if case == "csv":
+            dataname = pd.read_csv(file_name)
+        elif case == "json":
+            dataname = pd.read_json(file_name)
+        elif case == "xml":
+            dataname = pd.read_xml(file_name)
+        elif case == "txt":
+            dataname = pd.read_txt(file_name)
+        else:
+            print("File type not supported")
+            sys.exit()
     if case == "csv":
-        database = csv_to_db(file_name, db_name, table_name)
+        # Open the file and read it
+        csvfile = open(file_name, 'r')
+        reader = csv.reader(csvfile, delimiter=',')
+        #Then save it as dataname
+        dataname = []
+        for row in reader:
+            dataname.append(row)
+        csvfile.close()  
     elif case == "json":
-        database = json_to_db(file_name, db_name, table_name)
+        #Open the file and read it
+        jsonfile = open(file_name, 'r')
+        jsondata = json.load(jsonfile)
+        #Then save it as dataname
+        dataname = []
+        for row in jsondata:
+            dataname.append(row)
+        jsonfile.close()
+        
     elif case == "xml":
-        database = xml_to_db(file_name, db_name, table_name)
+        #Open the file and read it
+        xmlfile = open(file_name, 'r')
+        xmldata = xmlfile.read()
+        #Then save it as dataname
+        dataname = []
+        for row in xmldata:
+            dataname.append(row)
+        xmlfile.close()
+        
     elif case == "txt":
-        database = txt_to_db(file_name, db_name, table_name)
+        #Open the file and read it
+        txtfile = open(file_name, 'r')
+        txtdata = txtfile.read()
+        #Then save it as dataname
+        dataname = []
+        for row in txtdata:
+            dataname.append(row)
+        txtfile.close()
+        
+
     else:
         print("File type not supported")
         sys.exit()
-
-def csv_to_db(file_name, db_name, table_name):
-    conn = sqlite3.connect(db_name)
-    c = conn.cursor()
-    with open(file_name, 'r') as f:
-        reader = csv.reader(f)
-        headers = next(reader)
-        query = 'CREATE TABLE IF NOT EXISTS {} ({})'.format(table_name, ', '.join(['{} TEXT'.format(h) for h in headers]))
-        c.execute(query)
-        for row in reader:
-            query = 'INSERT INTO {} VALUES ({})'.format(table_name, ', '.join(['?' for _ in headers]))
-            c.execute(query, row)
-    conn.commit()
-    conn.close()
-    # return the database connection object
-    return conn
-
-def json_to_db(file_name, db_name, table_name):
-    conn = sqlite3.connect(db_name)
-    c = conn.cursor()
-    with open(file_name, 'r') as f:
-        data = json.load(f)
-        headers = list(data[0].keys())
-        query = 'CREATE TABLE IF NOT EXISTS {} ({})'.format(table_name, ', '.join(['{} TEXT'.format(h) for h in headers]))
-        c.execute(query)
-        for row in data:
-            values = [row[h] for h in headers]
-            query = 'INSERT INTO {} VALUES ({})'.format(table_name, ', '.join(['?' for _ in headers]))
-            c.execute(query, values)
-    conn.commit()
-    conn.close()
-    # return the database connection object
-    return conn
-
-def xml_to_db(file_name, db_name, table_name):
-    conn = sqlite3.connect(db_name)
-    c = conn.cursor()
-    tree = ET.parse(file_name)
-    root = tree.getroot()
-    headers = list(set([child.tag for child in root]))
-    query = 'CREATE TABLE IF NOT EXISTS {} ({})'.format(table_name, ', '.join(['{} TEXT'.format(h) for h in headers]))
-    c.execute(query)
-    for child in root:
-        values = [child.find(h).text for h in headers]
-        query = 'INSERT INTO {} VALUES ({})'.format(table_name, ', '.join(['?' for _ in headers]))
-        c.execute(query, values)
-    conn.commit()
-    conn.close()
-    # return the database connection object
-    return conn
-
-def txt_to_db(file_name, db_name, table_name):
-    conn = sqlite3.connect(db_name)
-    c = conn.cursor()
-    with open(file_name, 'r') as f:
-        lines = f.readlines()
-        headers = lines[0].strip().split(',')
-        query = 'CREATE TABLE IF NOT EXISTS {} ({})'.format(table_name, ', '.join(['{} TEXT'.format(h) for h in headers]))
-        c.execute(query)
-        for line in lines[1:]:
-            values = line.strip().split(',')
-            query = 'INSERT INTO {} VALUES ({})'.format(table_name, ', '.join(['?' for _ in headers]))
-            c.execute(query, values)
-    conn.commit()
-    conn.close()
-    # return the database connection object
-    return conn
-
+    return dataname
 
 
