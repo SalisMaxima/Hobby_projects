@@ -68,5 +68,4 @@ while  j < 1000:
         lst_violations.append(violation_)    
         if j % 100 == 0:
             print(f"Iteration {j}: Least violation = {least_violation}")
-    j += 1
     
